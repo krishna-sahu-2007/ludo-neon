@@ -54,10 +54,13 @@
         </div>
         
         <p id="setup-err" class="text-red-400 text-sm mt-4 text-center hidden">Need at least 2 players!</p>
-        <button onclick="startGame()">START GAME</button>
-            Enter the Arena
-        </button>
-    </div>
+<button onclick="startGame()" class="w-full bg-white text-black font-black py-3 rounded-xl hover:bg-zinc-200 transition-colors">
+    START GAME
+</button>
+
+<p class="text-center text-xs text-slate-500 mt-2">
+    Enter the Arena
+</p>
 
     <!-- Screen 2: Game -->
     <div id="game-screen" class="hidden w-full max-w-5xl flex flex-col lg:flex-row gap-8 items-center justify-center">
