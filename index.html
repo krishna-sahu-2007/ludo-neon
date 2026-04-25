@@ -7,6 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 
+        <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0ea5e9">
+
 <!-- 🔥 OPEN GRAPH META (REQUIRED) -->
 <meta property="og:title" content="Ludo Neon Game 🎮">
 <meta property="og:description" content="Play neon-style Ludo with AI, sound, vibration & smooth gameplay!">
@@ -14,7 +17,16 @@
 <meta property="og:url" content="https://krishna-sahu-2007.github.io/NEON-LUDO/">
 <meta property="og:type" content="website">
 
+
+
 </head>
+    
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+    
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
     <!-- Screen 1: Setup -->
