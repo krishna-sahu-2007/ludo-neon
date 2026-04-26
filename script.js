@@ -23,7 +23,7 @@ const sounds = {
     step: new Audio("sounds/step.mp3"),
     cut: new Audio("sounds/cut.mp3"),
     win: new Audio("sounds/win.mp3"),
-    home: new Audio("sound/home.mp3")
+    home: new Audio("sounds/home.mp3")
 };
 
 let masterVolume = 1;
