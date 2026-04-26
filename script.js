@@ -108,7 +108,9 @@ function togglePause() {
     } else {
         pauseScreen.classList.add('hidden');
        document.body.addEventListener('click', () => {
-    if (soundEnabled) bgMusic.play();
+    if (soundEnabled && bgMusicEnabled) {
+    bgMusic.play().catch(() => {});
+}
     }, { once: true });
     }
 }
@@ -287,7 +289,9 @@ const sleep = ms => new Promise(resolve => {
 }
 
        window.startGame = function() {
-        if (soundEnabled) bgMusic.play();
+       if (soundEnabled && bgMusicEnabled) {
+            bgMusic.play().catch(() => {});
+        }
             players = []; tokens = [];
             COLORS.forEach(color => {
                 const type = document.getElementById(`p-${color}`).value;
