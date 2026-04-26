@@ -9,12 +9,29 @@
             --safe-bg: #1e1e24;
         }
 
+                html, body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            min-height: 100%;
+        }        
+        
         body {
-            background-color: #000000;
+            margin: 0;
+            padding: 0;
+        
+            background:
+                linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.88)),
+                url("images/setup-bg.jpg") center / cover no-repeat fixed;
+        
             color: #f4f4f5;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        
             touch-action: manipulation;
             overflow-x: hidden;
+        
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         /* Update 1: Neon Thin White Title Styling */
