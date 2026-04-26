@@ -1,8 +1,9 @@
 {
-  "name": "Ludo Neon Arena",
+  "name": "Ludo Neon: Arena",
   "short_name": "Ludo Neon",
   "start_url": "./",
-  "display": "fullscreen",   
+  "scope": "./",
+  "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
