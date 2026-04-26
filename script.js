@@ -48,7 +48,14 @@ function playSound(type) {
     if (isPaused || !soundEnabled) return;
     if (!sounds[type]) return;
 
-    const audio = sounds[type].cloneNode();
+    let audio;
+
+    if (type === "step") {
+        audio = sounds[type];
+        audio.currentTime = 0;
+    } else {
+        audio = sounds[type].cloneNode();
+    }
 
     let volume = 1;
 
@@ -489,59 +496,66 @@ const sleep = ms => new Promise(resolve => {
     }
 });
 
-        function aiChooseMove(validTokens) {
-    let bestScore = -9999;
+function aiChooseMove(validTokens) {
     let bestToken = validTokens[0];
+    let bestScore = -999999;
 
     for (let t of validTokens) {
         let score = 0;
+        let targetRel = (t.state === "base") ? 0 : t.relPos + currentDice;
 
-        let targetRel = (t.state === 'base') ? 0 : t.relPos + currentDice;
+        // 1. Finish token first
+        if (targetRel === 56) score += 500;
 
-        // 🚀 ENTER BOARD
-        if (t.state === 'base') score += 60;
+        // 2. Bring token out only if useful
+        if (t.state === "base") {
+            score += 80;
 
-        // 🏁 FINISH PRIORITY
-        if (targetRel === 56) score += 200;
+            // If AI already has tokens outside, don't always open new one
+            let outside = tokens.filter(x => x.color === t.color && x.state !== "base" && x.relPos < 56);
+            if (outside.length >= 2) score -= 30;
+        }
 
-        // 📍 POSITION CALC
-        let coords = null;
+        // 3. Kill opponent
+        let targetCoords = null;
         let isSafe = false;
 
         if (targetRel <= 50) {
             let absIdx = (startOffsets[t.color] + targetRel) % 52;
-            coords = mainTrack[absIdx].join(',');
-            isSafe = safeZones.includes(coords);
+            targetCoords = mainTrack[absIdx].join(",");
+            isSafe = safeZones.includes(targetCoords);
         }
 
-        // 🩸 KILL BONUS (VERY HIGH)
-        let canKill = tokens.some(ot =>
+        let victims = tokens.filter(ot =>
             ot.color !== t.color &&
-            ot.state === 'track' &&
-            getTokenCoords(ot).join(',') === coords &&
+            ot.state === "track" &&
+            targetCoords &&
+            getTokenCoords(ot).join(",") === targetCoords &&
             !isSafe
         );
 
-        if (canKill) score += 150;
+        if (victims.length > 0) score += 350 * victims.length;
 
-        // 🛡 SAFE ZONE BONUS
-        if (isSafe) score += 40;
+        // 4. Safe zone is valuable
+        if (isSafe) score += 120;
 
-        // ⚠️ DANGER CHECK (enemy nearby)
-        let danger = tokens.some(ot => {
-            if (ot.color === t.color || ot.state !== 'track') return false;
+        // 5. Avoid landing in danger
+        let danger = isSquareDangerous(t.color, targetRel);
+        if (danger) score -= 220;
 
-            let dist = (t.relPos - ot.relPos + 52) % 52;
-            return dist > 0 && dist <= 6;
-        });
+        // 6. Escape if current token is already in danger
+        if (t.state !== "base" && isSquareDangerous(t.color, t.relPos)) {
+            score += 180;
+        }
 
-        if (danger) score -= 50;
+        // 7. Chase nearest human token
+        score += chaseScore(t.color, targetRel);
 
-        // 🧠 PROGRESS FORWARD
-        score += targetRel;
+        // 8. Prefer progress
+        score += targetRel * 3;
 
-        // 🎯 RANDOMNESS (avoid predictable AI)
-        score += Math.random() * 10;
+        // 9. Small randomness so AI doesn't feel robotic
+        score += Math.random() * 8;
 
         if (score > bestScore) {
             bestScore = score;
@@ -550,6 +564,52 @@ const sleep = ms => new Promise(resolve => {
     }
 
     return bestToken;
+}
+
+function isSquareDangerous(myColor, relPos) {
+    if (relPos < 0 || relPos > 50) return false;
+
+    let myAbs = (startOffsets[myColor] + relPos) % 52;
+    let myCoords = mainTrack[myAbs].join(",");
+
+    if (safeZones.includes(myCoords)) return false;
+
+    return tokens.some(enemy => {
+        if (enemy.color === myColor || enemy.state !== "track") return false;
+
+        for (let dice = 1; dice <= 6; dice++) {
+            let enemyTargetRel = enemy.relPos + dice;
+            if (enemyTargetRel > 50) continue;
+
+            let enemyAbs = (startOffsets[enemy.color] + enemyTargetRel) % 52;
+            let enemyCoords = mainTrack[enemyAbs].join(",");
+
+            if (enemyCoords === myCoords) return true;
+        }
+
+        return false;
+    });
+}
+
+function chaseScore(myColor, targetRel) {
+    if (targetRel < 0 || targetRel > 50) return 0;
+
+    let score = 0;
+    let myAbs = (startOffsets[myColor] + targetRel) % 52;
+
+    tokens.forEach(enemy => {
+        if (enemy.color === myColor || enemy.state !== "track") return;
+
+        let enemyAbs = (startOffsets[enemy.color] + enemy.relPos) % 52;
+
+        let distanceAhead = (enemyAbs - myAbs + 52) % 52;
+
+        if (distanceAhead > 0 && distanceAhead <= 12) {
+            score += (13 - distanceAhead) * 8;
+        }
+    });
+
+    return score;
 }
 
 async function executeMove(t) {
