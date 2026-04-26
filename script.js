@@ -8,6 +8,7 @@ document.addEventListener("click", () => {
 // ================== GLOBAL SETTINGS ==================
 let isPaused = false;
 let soundEnabled = true;
+let bgMusicEnabled = true;
 
 // 🎵 Background Music
 const bgMusic = new Audio("sounds/bg.mp3");
@@ -120,9 +121,29 @@ function toggleSound() {
 
     if (soundEnabled) {
         btn.innerText = "🔊 SOUND ON";
-        bgMusic.play();
+
+        if (bgMusicEnabled) {
+            bgMusic.play().catch(() => {});
+        }
     } else {
         btn.innerText = "🔇 SOUND OFF";
+        bgMusic.pause();
+    }
+}
+
+function toggleBGM() {
+    bgMusicEnabled = !bgMusicEnabled;
+
+    const btn = document.getElementById("bgm-btn");
+
+    if (bgMusicEnabled) {
+        btn.innerText = "🎵 MUSIC ON";
+
+        if (soundEnabled) {
+            bgMusic.play().catch(() => {});
+        }
+    } else {
+        btn.innerText = "🚫 MUSIC OFF";
         bgMusic.pause();
     }
 }
